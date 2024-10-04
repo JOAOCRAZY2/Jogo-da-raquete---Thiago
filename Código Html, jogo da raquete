@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jogo de Raquete</title>
+    <style>
+        canvas { background: #000; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const paddleWidth = 10, paddleHeight = 100;
+        const ballSize = 10;
+        let leftPaddleY = canvas.height / 2 - paddleHeight / 2;
+        let rightPaddleY = canvas.height / 2 - paddleHeight / 2;
+        let ballX = canvas.width / 2, ballY = canvas.height / 2;
+        let ballSpeedX = 5, ballSpeedY = 5;
+        let leftScore = 0, rightScore = 0;
+        const paddleSpeed = 10;
+        let wPressed = false, sPressed = false, upPressed = false, downPressed = false;
+        const maxSpeed = 50;
+
+        function drawRect(x, y, width, height, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, width, height);
+        }
+
+        function drawCircle(x, y, radius, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2, true);
+            ctx.fill();
+        }
+
+        function drawText(text, x, y, color) {
+            ctx.fillStyle = color;
+            ctx.font = '30px Arial';
+            ctx.fillText(text, x, y);
+        }
+
+        function resetBall() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            ballSpeedX = -ballSpeedX;
+            if (Math.abs(ballSpeedX) < maxSpeed) {
+                ballSpeedX += ballSpeedX > 0 ? 1 : -1;
+                ballSpeedY += ballSpeedY > 0 ? 1 : -1;
+            }
+        }
+
+        function moveEverything() {
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            if (ballY <= 0 || ballY >= canvas.height) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            if (ballX <= paddleWidth) {
+                if (ballY > leftPaddleY && ballY < leftPaddleY + paddleHeight) {
+                    ballSpeedX = -ballSpeedX;
+                } else {
+                    rightScore++;
+                    resetBall();
+                }
+            }
+
+            if (ballX >= canvas.width - paddleWidth) {
+                if (ballY > rightPaddleY && ballY < rightPaddleY + paddleHeight) {
+                    ballSpeedX = -ballSpeedX;
+                } else {
+                    leftScore++;
+                    resetBall();
+                }
+            }
+
+            if (wPressed && leftPaddleY > 0) {
+                leftPaddleY -= paddleSpeed;
+            }
+            if (sPressed && leftPaddleY < canvas.height - paddleHeight) {
+                leftPaddleY += paddleSpeed;
+            }
+            if (upPressed && rightPaddleY > 0) {
+                rightPaddleY -= paddleSpeed;
+            }
+            if (downPressed && rightPaddleY < canvas.height - paddleHeight) {
+                rightPaddleY += paddleSpeed;
+            }
+        }
+
+        function drawEverything() {
+            drawRect(0, 0, canvas.width, canvas.height, '#000');
+            drawRect(0, leftPaddleY, paddleWidth, paddleHeight, '#FFF');
+            drawRect(canvas.width - paddleWidth, rightPaddleY, paddleWidth, paddleHeight, '#FFF');
+            drawCircle(ballX, ballY, ballSize, '#FFF');
+            drawText(leftScore, 100, 100, '#FFF');
+            drawText(rightScore, canvas.width - 100, 100, '#FFF');
+        }
+
+        function gameLoop() {
+            moveEverything();
+            drawEverything();
+        }
+
+        window.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case 'w':
+                    wPressed = true;
+                    break;
+                case 's':
+                    sPressed = true;
+                    break;
+                case 'ArrowUp':
+                    upPressed = true;
+                    break;
+                case 'ArrowDown':
+                    downPressed = true;
+                    break;
+            }
+        });
+
+        window.addEventListener('keyup', function(event) {
+            switch(event.key) {
+                case 'w':
+                    wPressed = false;
+                    break;
+                case 's':
+                    sPressed = false;
+                    break;
+                case 'ArrowUp':
+                    upPressed = false;
+                    break;
+                case 'ArrowDown':
+                    downPressed = false;
+                    break;
+            }
+        });
+
+        setInterval(gameLoop, 1000 / 30);
+    </script>
+</body>
+</html>
